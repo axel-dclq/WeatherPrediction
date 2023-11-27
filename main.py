@@ -42,7 +42,7 @@ def get_model(month, lat, long, details=3, start_year=2000, end_year=2022):
     Example:
     >>> model = get_model(month="01", lat=40, long=-73, details=4, start_year=2010, end_year=2020)
     """
-    global list_quantile, data_table
+    global list_quantile, data_table, data_table_test
 
     print("Generation of dataset...")
 
@@ -94,6 +94,8 @@ def get_model(month, lat, long, details=3, start_year=2000, end_year=2022):
     data_table = data_table.rename(
         columns={"temperature_2m": "temperature", "relativehumidity_2m": "relativehumidity",
                  "cloud_cover": "cloudcover", "wind_speed_10m": "wind", "weather_code": "weathercode"})
+
+    data_table_test = data_table.dropna()
 
     # Create a temporary dataset to generate quantiles
     df = data_table.drop(columns=['weathercode'])
@@ -246,17 +248,17 @@ def test_model(model, step=10):
     :return: A dictionary containing the counts of different types of test results.
              Keys represent the result categories ('Exact', 'In propositions', 'Not corresponding').
     """
-    global data_table
+    global data_table_test
 
     # List to store the results of each test
     total = []
 
     # Iterate through the dataset in steps
-    for i in range(0, len(data_table), step):
-        print(f"{i} / {len(data_table)} ({round(i * 100 / len(data_table))}%)")
+    for i in range(0, len(data_table_test), step):
+        print(f"{i} / {len(data_table_test)} ({round(i * 100 / len(data_table_test))}%)")
 
         # Extract the test data for the current iteration
-        test = data_table.iloc[i]
+        test = data_table_test.iloc[i]
 
         # Get weather predictions using the model
         result = get_weather(model, test['temperature'], test['relativehumidity'], test['cloudcover'], test['wind'])
